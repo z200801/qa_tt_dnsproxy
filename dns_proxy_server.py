@@ -7,6 +7,7 @@
                         add internap_bind_IP, internal_bind_IP_port
                         change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone(". A 127.0.0.1"))
                         becose it is error
+                        add search sites in file bl_sites.txt - blacklist sites
 
     InterceptResolver - proxy requests to upstream server
                         (optionally intercepting)
