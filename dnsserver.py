@@ -128,7 +128,7 @@ class Server(Component):
 
 class App(Component):
 
-    def init(self, bind=("0.0.0.0", 53), server="8.8.8.8", port=53,
+    def init(self, bind=("0.0.0.0", 5353), server="192.168.1.3", port=53,
              verbose=False):
 
         if verbose:
