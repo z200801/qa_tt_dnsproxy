@@ -118,7 +118,7 @@ class ProcessQuery(Component):
 
 class Server(Component):
 
-    def init(self, bind=("0.0.0.0", 53)):
+    def init(self, bind=("0.0.0.0", 15353)):
         self.bind = bind
 
         self.transport = UDPServer(self.bind).register(self)
