@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
+    Create a DNS Proxy Server in Python3 with website blocking from text file.
     Code coping from https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
     Change some value:
                         add internap_bind_IP, internal_bind_IP_port
