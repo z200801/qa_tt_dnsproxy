@@ -264,6 +264,9 @@ if __name__ == '__main__':
 
     import argparse,sys,time
 
+    # Clear
+    print(chr(27) + "[2J")
+    
     # Most of these don't do anything so dont use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
     p.add_argument("--intercept","-i",action="append",
