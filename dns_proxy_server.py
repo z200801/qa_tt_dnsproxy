@@ -223,6 +223,12 @@ class InterceptResolver(BaseResolver):
             for rr in RR.fromZone(i,ttl=self.ttl):
                 self.zone.append((rr.rname,QTYPE[rr.rtype],rr))
 
+    def get_name_from_bl_file(self,qname):
+        self.qname = qname
+        status = False
+        if str(qname)[:str(qname).__len__()-1] in array_bl: status = True         
+        return status
+
     def jls_extract_def(self):
         return print
 
@@ -247,7 +253,7 @@ class InterceptResolver(BaseResolver):
                                     tcp=True,timeout=self.timeout)
                 reply = DNSRecord.parse(proxy_r)
                 # Detects if URL is the one below
-                if(str(qname) == "google.com."):
+                if self.get_name_from_bl_file(str(qname)): 
                     # Returns generic IP address
                     print("Address from blacklist tables is:",qname)
                     print("REPLY = " + str(reply))
@@ -266,6 +272,14 @@ if __name__ == '__main__':
 
     # Clear
     print(chr(27) + "[2J")
+
+    # Read blacklist files
+    file_bl = "bl_sites.txt"
+    file1 = open(file_bl, "r")
+    array_bl = []
+    array_bl = file1.read()
+    file1.close() 
+    array_bl = array_bl.splitlines()
     
     # Most of these don't do anything so dont use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
@@ -352,7 +366,6 @@ if __name__ == '__main__':
     udp_server.start_thread()
 
     if tcpEnabled:
-        
         tcp_server = DNSServer(resolver,
                                port=internal_bind_IP_port,
                                address=internal_bind_IP,
