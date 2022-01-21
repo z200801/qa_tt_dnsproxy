@@ -229,6 +229,7 @@ class InterceptResolver(BaseResolver):
     def get_name_from_bl_file(self,qname):
         self.qname = qname
         status = False
+        # Truncate qname - delete .
         if str(qname)[:str(qname).__len__()-1] in array_bl: status = True         
         return status
 
