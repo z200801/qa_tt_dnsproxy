@@ -258,7 +258,7 @@ class InterceptResolver(BaseResolver):
                 # Detects if URL is the one below
                 if self.get_name_from_bl_file(str(qname)): 
                     # Returns generic IP address
-                    print("Address from blacklist tables is:",qname)
+                    print("Address from blacklist tables:",qname)
                     print("REPLY = " + str(reply))
                     reply = request.reply()
                     reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
