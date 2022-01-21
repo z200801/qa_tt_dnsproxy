@@ -252,7 +252,7 @@ class InterceptResolver(BaseResolver):
                                     tcp=True,timeout=self.timeout)
                 reply = DNSRecord.parse(proxy_r)
                 # Detects if URL is the one below
-                if self.get_name_from_bl_file(str(qname)): 
+                if self.get_name_from_bl_file(str(qname)) and qtype == 'A': 
                     # Returns generic IP address
                     print("Address from blacklist tables:",qname)
                     print("REPLY = " + str(reply))
