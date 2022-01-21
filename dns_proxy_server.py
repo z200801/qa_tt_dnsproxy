@@ -5,10 +5,11 @@
     Create a DNS Proxy Server in Python3 with website blocking from text file.
     Code coping from https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
     Change some value:
-                        add internap_bind_IP, internal_bind_IP_port
                         change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
                         becose it is error
-                        add search sites in file bl_sites.txt - blacklist sites
+    Add:
+                        internap_bind_IP, internal_bind_IP_port
+                        search sites in file bl_sites.txt - blacklist sites
 
     InterceptResolver - proxy requests to upstream server
                         (optionally intercepting)
@@ -56,23 +57,23 @@ class variableVerboseDNSLogger(DNSLogger):
 
             Prefix argument enables/disables log prefix
         """
+        log_methods = ['log_recv','log_send','log_request','log_reply','log_truncated','log_error','log_data']
         self.verbose = verbose
         self.logToList = logToList
         self.currentLog = []
         # default = ["request","reply","truncated","error"]
-        default = ["request","error"]
+        default = ["error"]
         log = log.split(",") if log else []
         enabled = set([ s for s in log if s[0] not in '+-'] or default)
         [ enabled.add(l[1:]) for l in log if l.startswith('+') ]
         [ enabled.discard(l[1:]) for l in log if l.startswith('-') ]
-        for l in ['log_recv','log_send','log_request','log_reply',
-                  'log_truncated','log_error','log_data']:
+        for l in log_methods:
             if l[4:] not in enabled:
                 setattr(self,l,self.log_pass)
         self.prefix = prefix
 
     def log_pass(self,*args):
-        pass
+        pass 
 
     def log_prefix(self,handler):
         if self.prefix:
@@ -83,6 +84,8 @@ class variableVerboseDNSLogger(DNSLogger):
             return ""
 
     def log_recv(self,handler,data):
+        # print("Entire log_recv")
+        # print("Recive packet from ip:[%s], port:[%d]" %(handler.client_address[0],handler.client_address[1]))
         log = "%sReceived: [%s:%d] (%s) <%d> : %s" % (
                     self.log_prefix(handler),
                     handler.client_address[0],
@@ -91,13 +94,13 @@ class variableVerboseDNSLogger(DNSLogger):
                     len(data),
                     binascii.hexlify(data))
 
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        # self.verbose = True
+        if self.verbose:   print(log)
+        if self.logToList: self.currentLog.append(log)
         
 
     def log_send(self,handler,data):
+        # print("Entire log_send")
         log = "%sSent: [%s:%d] (%s) <%d> : %s" % (
                     self.log_prefix(handler),
                     handler.client_address[0],
@@ -106,13 +109,12 @@ class variableVerboseDNSLogger(DNSLogger):
                     len(data),
                     binascii.hexlify(data))
 
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        if self.verbose:   print(log)
+        if self.logToList: self.currentLog.append(log)
         
 
     def log_request(self,handler,request):
+        # print("Entire log_request")
         log = "%sRequest: [%s:%d] (%s) / '%s' (%s)" % (
                     self.log_prefix(handler),
                     handler.client_address[0],
@@ -120,14 +122,13 @@ class variableVerboseDNSLogger(DNSLogger):
                     handler.protocol,
                     request.q.qname,
                     QTYPE[request.q.qtype])
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        if self.verbose:    print(log)
+        if self.logToList:  self.currentLog.append(log)
         
         self.log_data(request)
 
     def log_reply(self,handler,reply):
+        # print("Entire to log_reply")
         if reply.header.rcode == RCODE.NOERROR:
             log = "%sReply: [%s:%d] (%s) / '%s' (%s) / RRs: %s" % (
                     self.log_prefix(handler),
@@ -146,10 +147,8 @@ class variableVerboseDNSLogger(DNSLogger):
                     reply.q.qname,
                     QTYPE[reply.q.qtype],
                     RCODE[reply.header.rcode])
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        if self.verbose:   print(log)
+        if self.logToList: self.currentLog.append(log)
         
         self.log_data(reply)
 
@@ -163,10 +162,8 @@ class variableVerboseDNSLogger(DNSLogger):
                     QTYPE[reply.q.qtype],
                     ",".join([QTYPE[a.rtype] for a in reply.rr]))
 
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        if self.verbose:   print(log)
+        if self.logToList: self.currentLog.append(log)
         
         self.log_data(reply)
 
@@ -178,10 +175,8 @@ class variableVerboseDNSLogger(DNSLogger):
                     handler.protocol,
                     e)
 
-        if self.verbose:
-            print(log)
-        if self.logToList:
-            self.currentLog.append(log)
+        if self.verbose:   print(log)
+        if self.logToList: self.currentLog.append(log)
 
     def log_data(self,dnsobj):
         print("\n",dnsobj.toZone("    "),"\n",sep="")
@@ -316,9 +311,10 @@ if __name__ == '__main__':
                     help="Upstream timeout (default: 5s)")
     p.add_argument("--all-qtypes",action='store_true',default=False,
                    help="Return an empty response if qname matches, but qtype doesn't")
-    p.add_argument("--log",default="request,reply,truncated,error",
+    # p.add_argument("--log",default="-request,-reply,truncated,error,-recv",
+    p.add_argument("--log",default="truncated,error",
                     help="Log hooks to enable (default: +request,+reply,+truncated,+error,-recv,-send,-data)")
-    p.add_argument("--log-prefix",action='store_true',default=False,
+    p.add_argument("--log-prefix",action='store_true',default=True,
                     help="Log prefix (timestamp/handler/resolver) (default: False)")
     args = p.parse_args()
 
@@ -363,10 +359,12 @@ if __name__ == '__main__':
             print("    | ","%s:%s:%s" % i,sep="")
 
     DNSHandler.log = {
+        #'log_recv',
         #'log_request',       # DNS Request
         #'log_reply',        # DNS Response
         #'log_truncated',    # Truncated
         #'log_error',        # Decoding error
+        #'log_send',
     }
 
     
@@ -388,9 +386,9 @@ if __name__ == '__main__':
 
     while udp_server.isAlive():
         time.sleep(1)
-        # print(DNSHandler.log)
+        #print(DNSHandler.log)
         # print("LOG START")
-        # print(logger.currentLog)
+        #print(logger.currentLog)
         logger.currentLog = []
         # print("LOG END")
 
