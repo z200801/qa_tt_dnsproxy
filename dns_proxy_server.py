@@ -314,7 +314,7 @@ if __name__ == '__main__':
     #'args.dns,_,args.dns_port = args.upstream.partition(':')
     #args.dns_port = int(args.dns_port or 53)
     tcpEnabled = True
-    internal_bind_IP = "127.0.0.1"
+    internal_bind_IP = "0.0.0.0"
     internal_bind_IP_port = 15353
     externalDNS = "1.1.1.1"
     externalDNSPort = 53
