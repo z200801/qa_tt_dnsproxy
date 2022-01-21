@@ -44,7 +44,7 @@ class variableVerboseDNSLogger(DNSLogger):
             log_data          - Dump full request/response
     """
 
-    def __init__(self,log="+send,+recv",prefix=True,verbose=True,logToList=True):
+    def __init__(self,log="",prefix=True,verbose=False,logToList=False):
         """
             Selectively enable log hooks depending on log argument
             (comma separated list of hooks to enable/disable)
@@ -59,7 +59,8 @@ class variableVerboseDNSLogger(DNSLogger):
         self.verbose = verbose
         self.logToList = logToList
         self.currentLog = []
-        default = ["request","reply","truncated","error","send","recive"]
+        # default = ["request","reply","truncated","error"]
+        default = ["request","error"]
         log = log.split(",") if log else []
         enabled = set([ s for s in log if s[0] not in '+-'] or default)
         [ enabled.add(l[1:]) for l in log if l.startswith('+') ]
@@ -260,8 +261,7 @@ class InterceptResolver(BaseResolver):
                     print("Address from blacklist tables is:",qname)
                     print("REPLY = " + str(reply))
                     reply = request.reply()
-                    # reply.add_answer(". A 127.0.0.1")
-                    reply.add_answer(*RR.fromZone("google.com. 156 IN A 127.0.0.1"))
+                    reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
                     print("REPLY = " + str(reply))
             except socket.timeout:
                 reply.header.rcode = getattr(RCODE,'SERVFAIL')
@@ -316,8 +316,7 @@ if __name__ == '__main__':
     tcpEnabled = True
     internal_bind_IP = "127.0.0.1"
     internal_bind_IP_port = 15353
-    externalDNS = "192.168.1.3"
-    # port = 15353
+    externalDNS = "1.1.1.1"
     externalDNSPort = 53
 
     resolver = InterceptResolver(address = externalDNS,
@@ -353,10 +352,10 @@ if __name__ == '__main__':
             print("    | ","%s:%s:%s" % i,sep="")
 
     DNSHandler.log = {
-        'log_request',       # DNS Request
-        'log_reply',        # DNS Response
-        'log_truncated',    # Truncated
-        'log_error',        # Decoding error
+        #'log_request',       # DNS Request
+        #'log_reply',        # DNS Response
+        #'log_truncated',    # Truncated
+        #'log_error',        # Decoding error
     }
 
     
