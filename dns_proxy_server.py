@@ -6,7 +6,7 @@
     Code coping from https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
     Change some value:
                         add internap_bind_IP, internal_bind_IP_port
-                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone(". A 127.0.0.1"))
+                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
                         becose it is error
                         add search sites in file bl_sites.txt - blacklist sites
 
