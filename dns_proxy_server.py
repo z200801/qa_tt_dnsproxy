@@ -229,7 +229,7 @@ class InterceptResolver(BaseResolver):
     def get_name_from_bl_file(self,qname):
         self.qname = qname
         status = False
-        # Truncate qname - delete dot
+        # Truncate qname - delete dot qname['google.com.'] -> qname['google.com]
         if str(qname)[:str(qname).__len__()-1] in array_bl: status = True         
         return status
 
@@ -277,12 +277,22 @@ if __name__ == '__main__':
     print(chr(27) + "[2J")
 
     # Read blacklist files
-    file_bl = "bl_sites.txt"
-    file1 = open(file_bl, "r")
     array_bl = []
-    array_bl = file1.read()
-    file1.close() 
-    array_bl = array_bl.splitlines()
+    file_bl = "bl_sites.txt"
+    try:
+        file1 = open(file_bl, "r")  
+    except IOError: 
+        print ("Could not read file:", file_bl)
+    except OSError:
+        print(f"OS error occurred trying to open {fname}")
+    except FileNotFoundError:
+        print(f"File {fname} not found.  Aborting")
+    except Exception as err:
+        print(f"Unexpected error opening {fname} is",repr(err))
+    else:
+        array_bl = file1.read()
+        file1.close() 
+        array_bl = array_bl.splitlines()
     
     # Most of these don't do anything so dont use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
