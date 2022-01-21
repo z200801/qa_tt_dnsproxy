@@ -323,7 +323,7 @@ if __name__ == '__main__':
     tcpEnabled = True
     internal_bind_IP = "0.0.0.0"
     internal_bind_IP_port = 15353
-    externalDNS = "1.1.1.1"
+    externalDNS = "192.168.1.3"
     externalDNSPort = 53
 
     resolver = InterceptResolver(address = externalDNS,
