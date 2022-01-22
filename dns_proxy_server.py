@@ -260,8 +260,8 @@ class InterceptResolver(BaseResolver):
                 reply = DNSRecord.parse(proxy_r)
                 # Detects sites from blacklist file and query QTYPE is A or AAAA
                 # if self.get_name_from_bl_file(str(qname)) and qtype in ['A','AAAA']: 
-                qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA']
-                if self.get_name_from_bl_file(str(qname)) and qtype not in qtype_transparent: 
+                qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA', 'MD', 'MF', 'MB', 'MG', 'MR', 'WKS', 'HINFO', 'MINFO']
+                if self.get_name_from_bl_file(str(qname)) and (qtype not in qtype_transparent): 
                     # Returns generic IP address
                     print("Address from blacklist tables:",qname)
                     print("REPLY = " + str(reply))
