@@ -227,7 +227,7 @@ class InterceptResolver(BaseResolver):
         # Truncate qname - delete dot qname['google.com.'] -> qname['google.com]
         qname = str(qname)[:str(qname).__len__()-1]
         # if qname in array_bl: status = True
-        # Search query name in black list array with regex
+        # Search query name in black list array with shortname
         for i in range(len(array_bl)):
             regex = re.compile(array_bl[i])
             if array_bl[i] == ''.join(regex.findall(qname)): 
