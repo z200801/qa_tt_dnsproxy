@@ -8,8 +8,9 @@
                         change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
                         becose it is error
     Add:
-                        internap_bind_IP, internal_bind_IP_port
-                        search sites in file bl_sites.txt - blacklist sites
+                        internal_bind_IP, internal_bind_IP_port
+                        search sites in file bl_sites.txt - blacklist sites, with comment #, and short names (exmpl. google)
+
 
     InterceptResolver - proxy requests to upstream server
                         (optionally intercepting)
