@@ -225,7 +225,14 @@ class InterceptResolver(BaseResolver):
         self.qname = qname
         status = False
         # Truncate qname - delete dot qname['google.com.'] -> qname['google.com]
-        if str(qname)[:str(qname).__len__()-1] in array_bl: status = True         
+        qname = str(qname)[:str(qname).__len__()-1]
+        # if qname in array_bl: status = True
+        # Search query name in black list array with regex
+        for i in range(len(array_bl)):
+            regex = re.compile(array_bl[i])
+            if array_bl[i] == ''.join(regex.findall(qname)): 
+                status = True
+                break
         return status
 
     def jls_extract_def(self):
@@ -268,7 +275,7 @@ class InterceptResolver(BaseResolver):
 
 if __name__ == '__main__':
 
-    import argparse,sys,time
+    import argparse,sys,time,re
 
     # Clear
     print(chr(27) + "[2J")
@@ -325,7 +332,7 @@ if __name__ == '__main__':
     tcpEnabled = True
     internal_bind_IP = "0.0.0.0"
     internal_bind_IP_port = 15353
-    externalDNS = "192.168.1.3"
+    externalDNS = "1.1.1.1"
     externalDNSPort = 53
 
     resolver = InterceptResolver(address = externalDNS,
