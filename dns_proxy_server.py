@@ -297,7 +297,14 @@ if __name__ == '__main__':
         array_bl = file1.read()
         file1.close() 
         array_bl = array_bl.splitlines()
-    
+        # Remove line from array_bl with 1st char # - is coment
+        q1 = False
+        while q1 == False:
+            for i in range(len(array_bl)): 
+                if array_bl[i][0] == "#": array_bl.pop(i);break
+                if i == (len(array_bl)-1): q1 = True; break
+
+        
     # Most of these don't do anything so dont use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
     p.add_argument("--intercept","-i",action="append",
