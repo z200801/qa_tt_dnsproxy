@@ -24,6 +24,8 @@ from dnslib import DNSRecord,RR,QTYPE,RCODE,parse_time
 from dnslib.server import DNSServer,DNSHandler,BaseResolver,DNSLogger
 from dnslib.label import DNSLabel
 
+
+##################################################################################################
 # Custom DNSLogger class with variable verbose setting
 class variableVerboseDNSLogger(DNSLogger):
 
@@ -221,21 +223,24 @@ class InterceptResolver(BaseResolver):
                 i = sys.stdin.read()
             for rr in RR.fromZone(i,ttl=self.ttl):
                 self.zone.append((rr.rname,QTYPE[rr.rtype],rr))
-
+##################################################################################################
     def get_name_from_bl_file(self,qname):
         self.qname = qname
-        status = False
+        global blacklist_srv_cfg
+
+        bl_status = False
+        bl_answer = ''
         # Truncate qname - delete dot qname['google.com.'] -> qname['google.com]
         qname = str(qname)[:str(qname).__len__()-1]
-        # if qname in array_bl: status = True
         # Search query name in black list array with shortname
-        for i in range(len(array_bl)):
-            regex = re.compile(array_bl[i])
-            if array_bl[i] == ''.join(regex.findall(qname)): 
-                status = True
+        for i in blacklist_srv_cfg:
+            regex = re.compile(i)
+            if i == ''.join(regex.findall(qname)): 
+                bl_answer = blacklist_srv_cfg[i]
+                bl_status = True
                 break
-        return status
-
+        return bl_status, bl_answer
+##################################################################################################
     def jls_extract_def(self):
         return print
 
@@ -262,48 +267,82 @@ class InterceptResolver(BaseResolver):
                 # Detects sites from blacklist file and query QTYPE is A or AAAA
                 # if self.get_name_from_bl_file(str(qname)) and qtype in ['A','AAAA']: 
                 qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA', 'MD', 'MF', 'MB', 'MG', 'MR', 'WKS', 'HINFO', 'MINFO']
-                if self.get_name_from_bl_file(str(qname)) and (qtype not in qtype_transparent): 
+                bl_get_address = False
+                bl_adress_answer = ''
+                bl_get_address, bl_adress_answer = self.get_name_from_bl_file(str(qname))
+                # if self.get_name_from_bl_file(str(qname)) and (qtype not in qtype_transparent): 
+                if bl_get_address and (qtype not in qtype_transparent): 
                     # Returns generic IP address
                     print("Address from blacklist tables:",qname)
                     print("REPLY = " + str(reply))
                     reply = request.reply()
-                    reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
+                    reply.add_answer(*RR.fromZone("%s %s %s" %(qname,qtype,bl_adress_answer)))
                     print("REPLY = " + str(reply))
             except socket.timeout:
                 reply.header.rcode = getattr(RCODE,'SERVFAIL')
 
         return reply
+##################################################################################################
+# Read config file
+def read_cfg_file():
+    global blacklist_srv_cfg
+    global default_srv_cfg
+
+    global tcpEnabled
+    global internal_bind_IP
+    global internal_bind_IP_port
+    global externalDNS
+    global externalDNSPort
+    global file_cfg
+    config = configparser.ConfigParser()
+    
+    config.sections()
+    try:
+        if config.read(file_cfg) != []:
+            pass
+        else:
+            raise IOError
+    except IOError: 
+        print ("Could not read file:[%s]" %file_cfg)
+        # When not existing cfg file we use standart options
+        # init_default_setting()
+    else:
+            default_srv_cfg = config['Default']
+
+            
+            tcpEnabled = default_srv_cfg['tcpEnabled']
+            internal_bind_IP = default_srv_cfg['internal_bind_IP']
+            internal_bind_IP_port = int(default_srv_cfg['internal_bind_IP_port'])
+            externalDNS = default_srv_cfg['externalDNS']
+            externalDNSPort = int(default_srv_cfg['externalDNSPort'])
+            blacklist_srv_cfg = config['Blacklist']
+
+            # for sites_bl in blacklist_srv_cfg: print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
+
+##################################################################################################
 
 if __name__ == '__main__':
 
     import argparse,sys,time,re
+    import configparser
+    from decimal import Decimal
+
+    file_cfg = 'dns_proxy_server.cfg'
+
+    tcpEnabled = True
+    internal_bind_IP = "0.0.0.0"
+    internal_bind_IP_port = 15353
+    externalDNS = "1.1.1.1"
+    externalDNSPort = 53
+
 
     # Clear
     print(chr(27) + "[2J")
 
-    # Read blacklist files
-    array_bl = []
-    file_bl = "bl_sites.txt"
-    try:
-        file1 = open(file_bl, "r")  
-    except IOError: 
-        print ("Could not read file:[%s]" %file_bl)
-    except OSError:
-        print("OS error occurred trying to open:[%s]" %file_bl)
-    except FileNotFoundError:
-        print("File [%s] not found.  Aborting" %file_bl)
-    except Exception as err:
-        print("Unexpected error opening [%s] is" %file_bl)
-    else:
-        array_bl = file1.read()
-        file1.close() 
-        array_bl = array_bl.splitlines()
-        # Remove line from array_bl with 1st char # - is coment
-        q1 = False
-        while q1 == False:
-            for i in range(len(array_bl)): 
-                if array_bl[i][0] == "#": array_bl.pop(i);break
-                if i == (len(array_bl)-1): q1 = True; break
+    blacklist_srv_cfg = []
+    default_srv_cfg = []
+    # Read config file
+    read_cfg_file()
 
         
     # Most of these don't do anything so don't use them
@@ -337,12 +376,7 @@ if __name__ == '__main__':
 
     #'args.dns,_,args.dns_port = args.upstream.partition(':')
     #args.dns_port = int(args.dns_port or 53)
-    tcpEnabled = True
-    internal_bind_IP = "0.0.0.0"
-    internal_bind_IP_port = 15353
-    externalDNS = "1.1.1.1"
-    externalDNSPort = 53
-
+    
     resolver = InterceptResolver(address = externalDNS,
                                  port = externalDNSPort,
                                  ttl = "60s",
