@@ -20,6 +20,7 @@
                         name ip_to_answer
 
                         If config file not found (not exist, or another OS sys error) use standart parameters
+                        Check IP from config file. If the ip address is incorrect that assign 127.0.0.1
                         
 
 
@@ -297,6 +298,8 @@ class InterceptResolver(BaseResolver):
 ##################################################################################################
 # Read config file
 def read_cfg_file():
+    def validip(ip): 
+        return ip.count('.') == 3 and  all(0<=int(num)<256 for num in ip.rstrip().split('.'))
     global blacklist_srv_cfg
     global default_srv_cfg
 
@@ -320,16 +323,19 @@ def read_cfg_file():
         # init_default_setting()
     else:
             default_srv_cfg = config['Default']
-
-            
             tcpEnabled = default_srv_cfg['tcpEnabled']
             internal_bind_IP = default_srv_cfg['internal_bind_IP']
             internal_bind_IP_port = int(default_srv_cfg['internal_bind_IP_port'])
             externalDNS = default_srv_cfg['externalDNS']
             externalDNSPort = int(default_srv_cfg['externalDNSPort'])
             blacklist_srv_cfg = config['Blacklist']
-
-            # for sites_bl in blacklist_srv_cfg: print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
+            
+            for sites_bl in blacklist_srv_cfg: 
+                # print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
+                if validip(blacklist_srv_cfg[sites_bl]) != True:
+                    blacklist_srv_cfg[sites_bl] = '127.0.0.1'
+                print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
+                
 
 ##################################################################################################
 
