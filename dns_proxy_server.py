@@ -2,24 +2,25 @@
 # -*- coding: utf-8 -*-
 
 """
-    Create a DNS Proxy Server in Python3 with website blocking from text file.
-    Code coping from https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
+    Create a DNS Proxy Server in Python3 with website blocking from config file.
+    Source code coping from end answers https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
     Change some value:
-                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s A 127.0.0.1" % str(qname)))
+                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s %s %s" %(qname,qtype,bl_adress_answer)))
                         becose it is error
     Add:
                         internal_bind_IP, internal_bind_IP_port
                         Config files dns_proxy_server.cfg with sections 
                         [Default]
-                            tcpEnabled = True               # TCP bind True or False
-                            internal_bind_IP = 0.0.0.0      # internal bind ip address
-                            internal_bind_IP_port = 15353   # internal IP Port
-                            externalDNS = 1.1.1.1           # external DNS server
-                            externalDNSPort = 53            # External DNS server port
+                        tcpEnabled = True               # TCP bind True or False
+                        internal_bind_IP = 0.0.0.0      # internal bind ip address
+                        internal_bind_IP_port = 53   # internal IP Port
+                        externalDNS = 1.1.1.1           # external DNS server
+                        externalDNSPort = 53            # External DNS server port
                         [Blacklist]
                         name ip_to_answer
 
-                        search sites in file bl_sites.txt - blacklist sites, with comment #, and short names (exmpl. google)
+                        If config file not found (not exist, or another OS sys error) use standart parameters
+                        
 
 
     InterceptResolver - proxy requests to upstream server
@@ -274,6 +275,7 @@ class InterceptResolver(BaseResolver):
                     proxy_r = request.send(upstream,upstream_port,
                                     tcp=True,timeout=self.timeout)
                 reply = DNSRecord.parse(proxy_r)
+                
                 # Detects sites from blacklist file and query QTYPE is A or AAAA
                 # if self.get_name_from_bl_file(str(qname)) and qtype in ['A','AAAA']: 
                 qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA', 'MD', 'MF', 'MB', 'MG', 'MR', 'WKS', 'HINFO', 'MINFO']
