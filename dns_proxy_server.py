@@ -309,11 +309,12 @@ def read_cfg_file():
     global externalDNS
     global externalDNSPort
     global file_cfg
-    config = configparser.ConfigParser()
-    
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.sections()
+    result_read_cfg = config.read(file_cfg)
     config.sections()
     try:
-        if config.read(file_cfg) != []:
+        if result_read_cfg != []:
             pass
         else:
             raise IOError
@@ -332,8 +333,13 @@ def read_cfg_file():
             
             for sites_bl in blacklist_srv_cfg: 
                 # print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
-                if validip(blacklist_srv_cfg[sites_bl]) != True:
-                    blacklist_srv_cfg[sites_bl] = '127.0.0.1'
+                # if validip(blacklist_srv_cfg[sites_bl]) != True: blacklist_srv_cfg[sites_bl] = '127.0.0.1'
+                if blacklist_srv_cfg[sites_bl] == '' \
+                    or blacklist_srv_cfg[sites_bl] == None: 
+                        blacklist_srv_cfg[sites_bl] = '127.0.0.1'
+                else:
+                    if validip(blacklist_srv_cfg[sites_bl]) != True: 
+                        blacklist_srv_cfg[sites_bl] = '127.0.0.1'
                 print("%s = %s" %(sites_bl,blacklist_srv_cfg[sites_bl]))
                 
 
