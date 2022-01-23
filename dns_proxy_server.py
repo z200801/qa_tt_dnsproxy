@@ -9,6 +9,16 @@
                         becose it is error
     Add:
                         internal_bind_IP, internal_bind_IP_port
+                        Config files dns_proxy_server.cfg with sections 
+                        [Default]
+                            tcpEnabled = True               # TCP bind True or False
+                            internal_bind_IP = 0.0.0.0      # internal bind ip address
+                            internal_bind_IP_port = 15353   # internal IP Port
+                            externalDNS = 1.1.1.1           # external DNS server
+                            externalDNSPort = 53            # External DNS server port
+                        [Blacklist]
+                        name ip_to_answer
+
                         search sites in file bl_sites.txt - blacklist sites, with comment #, and short names (exmpl. google)
 
 
