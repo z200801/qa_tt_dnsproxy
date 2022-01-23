@@ -306,7 +306,7 @@ if __name__ == '__main__':
                 if i == (len(array_bl)-1): q1 = True; break
 
         
-    # Most of these don't do anything so dont use them
+    # Most of these don't do anything so don't use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
     p.add_argument("--intercept","-i",action="append",
                     metavar="<zone record>",
