@@ -343,7 +343,7 @@ if __name__ == '__main__':
 
     tcpEnabled = True
     internal_bind_IP = "0.0.0.0"
-    internal_bind_IP_port = 15353
+    internal_bind_IP_port = 53
     externalDNS = "1.1.1.1"
     externalDNSPort = 53
 
