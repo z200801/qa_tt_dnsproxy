@@ -287,13 +287,13 @@ if __name__ == '__main__':
     try:
         file1 = open(file_bl, "r")  
     except IOError: 
-        print ("Could not read file:", file_bl)
+        print ("Could not read file:[%s]" %file_bl)
     except OSError:
-        print(f"OS error occurred trying to open {fname}")
+        print("OS error occurred trying to open:[%s]" %file_bl)
     except FileNotFoundError:
-        print(f"File {fname} not found.  Aborting")
+        print("File [%s] not found.  Aborting" %file_bl)
     except Exception as err:
-        print(f"Unexpected error opening {fname} is",repr(err))
+        print("Unexpected error opening [%s] is" %file_bl)
     else:
         array_bl = file1.read()
         file1.close() 
