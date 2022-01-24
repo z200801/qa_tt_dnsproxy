@@ -309,7 +309,8 @@ def read_cfg_file():
     global externalDNS
     global externalDNSPort
     global file_cfg
-    config = configparser.ConfigParser(allow_no_value=True)
+    # config = configparser.ConfigParser(allow_no_value=True)
+    config = configparser.ConfigParser(allow_no_value=False)
     config.sections()
     result_read_cfg = config.read(file_cfg)
     config.sections()
