@@ -21,6 +21,7 @@
 
                         If config file not found (not exist, or another OS sys error) use standart parameters
                         Check IP from config file. If the ip address is incorrect that assign 127.0.0.1
+                        IPv6 not implement, for address from blacklist return ::1 (localhost)
                         
 
 
