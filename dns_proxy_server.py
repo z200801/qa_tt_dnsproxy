@@ -194,6 +194,7 @@ class variableVerboseDNSLogger(DNSLogger):
         if self.logToList: self.currentLog.append(log)
 
     def log_data(self,dnsobj):
+        # print("Function: log_data")
         print("\n",dnsobj.toZone("    "),"\n",sep="")
         self.dataLog = str("\n" + str(dnsobj.toZone("    ")) + "\n" + str(sep=""))
 
@@ -257,6 +258,7 @@ class InterceptResolver(BaseResolver):
         return print
 
     def resolve(self,request,handler):
+        # print("Function: reoslve")
         matched = False
         reply = request.reply()
         qname = request.q.qname
@@ -276,6 +278,20 @@ class InterceptResolver(BaseResolver):
                     proxy_r = request.send(upstream,upstream_port,
                                     tcp=True,timeout=self.timeout)
                 reply = DNSRecord.parse(proxy_r)
+                # ttl_a = reply.rr[0].ttl
+                # ttl_a = reply.rr[0]._ttl
+                ttl_a = 60
+                try:
+                    ttl_a = reply.a.ttl
+                except Exception:
+                    try:
+                        ttl_a = reply.rr[0]._ttl
+                    except Exception:
+                        try:
+                            # ttl_a = reply.a.ttl
+                            ttl_a = reply.rr[0].ttl
+                        except Exception:
+                            pass
                 
                 # Detects sites from blacklist file and query QTYPE is A or AAAA
                 # if self.get_name_from_bl_file(str(qname)) and qtype in ['A','AAAA']: 
@@ -292,7 +308,7 @@ class InterceptResolver(BaseResolver):
                     # qname1 = str(qname)[:str(qname).__len__()-1]
                     # Check request at IPv6 (AAAA) answer to ::1 (IPv4 is 127.0.0.1)
                     if qtype == 'AAAA': bl_address_answer = '::1'
-                    reply.add_answer(*RR.fromZone("%s %d %s %s" %(str(qname),ttl1,qtype,bl_address_answer)))
+                    reply.add_answer(*RR.fromZone("%s %d %s %s" %(str(qname),ttl_a,qtype,bl_address_answer)))
                     print("REPLY = " + str(reply))
             except socket.timeout:
                 reply.header.rcode = getattr(RCODE,'SERVFAIL')
@@ -370,7 +386,6 @@ if __name__ == '__main__':
     default_srv_cfg = []
     # Read config file
     read_cfg_file()
-
         
     # Most of these don't do anything so don't use them
     p = argparse.ArgumentParser(description="DNS Intercept Proxy, please ignore arguments and run it")
