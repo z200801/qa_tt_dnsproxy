@@ -5,7 +5,7 @@
     Create a DNS Proxy Server in Python3 with website blocking from config file.
     Source code coping from end answers https://stackoverflow.com/questions/64792845/create-a-dns-server-in-python3-with-website-blocking
     Change some value:
-                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s %s %s" %(qname,qtype,bl_adress_answer)))
+                        change reply.add_answer(". A 0.0.0.0") to reply.add_answer(*RR.fromZone("%s %s %s" %(qname,qtype,bl_address_answer)))
                         becose it is error
     Add:
                         internal_bind_IP, internal_bind_IP_port
@@ -206,7 +206,7 @@ class InterceptResolver(BaseResolver):
         matching local records
     """
 
-    def __init__(self,address,port,ttl,intercept,skip,nxdomain,forward,all_qtypes,timeout=0):
+    def __init__(self,address,port,ttl,intercept,skip,nxdomain,forward,all_qtypes,timeout):
         """
             address/port    - upstream server
             ttl             - default ttl for intercept records
@@ -261,7 +261,7 @@ class InterceptResolver(BaseResolver):
         reply = request.reply()
         qname = request.q.qname
         qtype = QTYPE[request.q.qtype]
-        
+        ttl1 = reply.a.ttl
         # Check for NXDOMAIN
         print("QNAME label= " + str(qname) + "\n")
         
@@ -281,15 +281,18 @@ class InterceptResolver(BaseResolver):
                 # if self.get_name_from_bl_file(str(qname)) and qtype in ['A','AAAA']: 
                 qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA', 'MD', 'MF', 'MB', 'MG', 'MR', 'WKS', 'HINFO', 'MINFO']
                 bl_get_address = False
-                bl_adress_answer = ''
-                bl_get_address, bl_adress_answer = self.get_name_from_bl_file(str(qname))
+                bl_address_answer = ''
+                bl_get_address, bl_address_answer = self.get_name_from_bl_file(str(qname))
                 # if self.get_name_from_bl_file(str(qname)) and (qtype not in qtype_transparent): 
                 if bl_get_address and (qtype not in qtype_transparent): 
                     # Returns generic IP address
                     print("Address from blacklist tables:",qname)
                     print("REPLY = " + str(reply))
                     reply = request.reply()
-                    reply.add_answer(*RR.fromZone("%s %s %s" %(qname,qtype,bl_adress_answer)))
+                    # qname1 = str(qname)[:str(qname).__len__()-1]
+                    # Check request at IPv6 (AAAA) answer to ::1 (IPv4 is 127.0.0.1)
+                    if qtype == 'AAAA': bl_address_answer = '::1'
+                    reply.add_answer(*RR.fromZone("%s %d %s %s" %(str(qname),ttl1,qtype,bl_address_answer)))
                     print("REPLY = " + str(reply))
             except socket.timeout:
                 reply.header.rcode = getattr(RCODE,'SERVFAIL')
@@ -359,7 +362,6 @@ if __name__ == '__main__':
     internal_bind_IP_port = 53
     externalDNS = "1.1.1.1"
     externalDNSPort = 53
-
 
     # Clear
     print(chr(27) + "[2J")
