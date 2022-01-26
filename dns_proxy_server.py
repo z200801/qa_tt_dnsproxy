@@ -245,13 +245,14 @@ class InterceptResolver(BaseResolver):
         bl_status = False
         bl_answer = ''
         # Truncate qname - delete dot qname['google.com.'] -> qname['google.com]
-        qname = str(qname)[:str(qname).__len__()-1]
+        # qname = str(qname)[:str(qname).__len__()-1]
         # Search query name in black list array with shortname
         for i in blacklist_srv_cfg:
             regex = re.compile(i)
             if i == ''.join(regex.findall(qname)): 
                 bl_answer = blacklist_srv_cfg[i]
                 bl_status = True
+                # del qname
                 break
         return bl_status, bl_answer
 ##################################################################################################
@@ -299,7 +300,7 @@ class InterceptResolver(BaseResolver):
                 qtype_transparent = ['CNAME','MX', 'TXT', 'NS', 'PTR', 'SOA', 'MD', 'MF', 'MB', 'MG', 'MR', 'WKS', 'HINFO', 'MINFO']
                 bl_get_address = False
                 bl_address_answer = ''
-                bl_get_address, bl_address_answer = self.get_name_from_bl_file(str(qname))
+                bl_get_address, bl_address_answer = self.get_name_from_bl_file(str(qname)[:str(qname).__len__()-1])
                 # if self.get_name_from_bl_file(str(qname)) and (qtype not in qtype_transparent): 
                 if bl_get_address and (qtype not in qtype_transparent): 
                     # Returns generic IP address
@@ -311,6 +312,7 @@ class InterceptResolver(BaseResolver):
                     if qtype == 'AAAA': bl_address_answer = '::1'
                     reply.add_answer(*RR.fromZone("%s %d %s %s" %(str(qname),ttl_a,qtype,bl_address_answer)))
                     print("REPLY = " + str(reply))
+                del bl_get_address, bl_address_answer, qtype_transparent
             except socket.timeout:
                 reply.header.rcode = getattr(RCODE,'SERVFAIL')
 
